@@ -105,7 +105,7 @@
     #leaflet-map {
       width: 100%;
       height: 500px;       /* Standardhöhe */
-      min-height: 300px;   /* Damit sie auch auf sehr engen Bildschirmen sichtbar bleibt */
+      min-height: 300px;   /* Sichtbarkeit auf sehr kleinen Bildschirmen */
       border: 1px solid #ddd;
       background-color: var(--color-light);
       border-radius: 8px;
@@ -157,7 +157,7 @@
       display: block;
     }
 
-    /* Marker-Punkte */
+    /* Marker-Punkte (manuell) */
     .manual-map .marker {
       position: absolute;
       width: 10px;
@@ -206,7 +206,7 @@
       background: rgba(0, 0, 255, 0.15);
     }
 
-    /* Legende */
+    /* Legenden */
     .legend {
       margin-top: 1rem;
       background: rgba(255, 255, 255, 0.8);
@@ -243,6 +243,7 @@
     }
 
     /* Responsive Design: Lecture 5 */
+
     /* 1. Breakpoint: Tablet / mittlere Breite */
     @media (max-width: 800px) {
       main {
@@ -258,10 +259,11 @@
       .manual-map {
         max-width: 100%;
       }
-      .legend {
+      /* Legende der manuellen Karte verkleinern */
+      .legend-manual {
         font-size: 0.9em;
       }
-      /* HiDPI-Bilder ausblenden, wenn wir sie nicht möchten */
+      /* HiDPI-Bilder (falls vorhanden) ausblenden */
       .high-res-only {
         display: none;
       }
@@ -286,11 +288,22 @@
       #leaflet-map {
         height: 300px;
       }
-      .legend {
+      /* Legende der manuellen Karte auf Mobile ausblenden */
+      .legend-manual {
         display: none;
       }
-      .manual-map {
-        border-width: 1px;
+      /* Legende der Leaflet-Karte mobil einblenden */
+      .legend-leaflet {
+        display: inline-block;
+        font-size: 0.9em;
+      }
+      /* Marker der manuellen Karte kleiner machen */
+      .manual-map .marker {
+        width: 6px;
+        height: 6px;
+      }
+      .manual-map .marker:hover {
+        transform: scale(1.4);
       }
       ul {
         padding-left: 1rem;
@@ -344,9 +357,9 @@
         <img
           src="images/map.png"
           srcset="
-            images/map-small.png  330w,
+            images/map-small.png   330w,
             images/map-fallback.png 960w,
-            images/map-2x.png 1280w
+            images/map-2x.png     1280w
           "
           sizes="
             (max-width: 500px) 100vw,
@@ -357,7 +370,7 @@
           class="base-map"
         />
 
-        <!-- Drei Marker-Punkte -->
+        <!-- Drei Marker-Punkte (manuell) -->
         <div class="marker" style="top: 24%; left: 58%;"
              data-title="Georgien"
              data-text='Massive Proteste in Tiflis gegen das umstrittene "russische Agentengesetz".<br><a href="https://www.derstandard.at/consent/tcf/story/3000000246988/eu-beitrittsverz246gerung-ausschreitungen-bei-protesten-in-georgien" target="_blank">Zur Meldung</a>'>
@@ -374,23 +387,21 @@
         <div id="manual-rect" title="Zur interaktiven Karte scrollen"></div>
       </div>
 
-      <div class="legend">
-        <h3>Legende</h3>
+      <!-- Legende für die manuelle Karte -->
+      <div class="legend legend-manual">
+        <h3>Legende (Manuelle Karte)</h3>
         <ul>
           <li>
             <img src="images/icon_free.png" class="legend-icon" /><strong>Frei</strong>
           </li>
           <li>
-            <img src="images/icon_partly_free.png" class="legend-icon" />
-            <strong>Teilweise frei</strong>
+            <img src="images/icon_partly_free.png" class="legend-icon" /><strong>Teilweise frei</strong>
           </li>
           <li>
-            <img src="images/icon_not_free.png" class="legend-icon" />
-            <strong>Nicht frei</strong>
+            <img src="images/icon_not_free.png" class="legend-icon" /><strong>Nicht frei</strong>
           </li>
           <li>
-            <div class="legend-box"></div>
-            <strong>Europäischer Kontinent</strong>
+            <div class="legend-box"></div><strong>Europäischer Kontinent</strong>
           </li>
         </ul>
       </div>
@@ -400,12 +411,31 @@
     <section id="leaflet-section" class="map-container">
       <h2>Politische Freiheit in Europa</h2>
       <div id="leaflet-map"></div>
+
+      <!-- Legende für die Leaflet-Karte -->
+      <div class="legend legend-leaflet">
+        <h3>Legende (Leaflet-Karte)</h3>
+        <ul>
+          <li>
+            <img src="images/icon_free.png" class="legend-icon" /><strong>Frei</strong>
+          </li>
+          <li>
+            <img src="images/icon_partly_free.png" class="legend-icon" /><strong>Teilweise frei</strong>
+          </li>
+          <li>
+            <img src="images/icon_not_free.png" class="legend-icon" /><strong>Nicht frei</strong>
+          </li>
+          <li>
+            <div class="legend-box"></div><strong>Europäischer Kontinent</strong>
+          </li>
+        </ul>
+      </div>
     </section>
 
     <!-- Länderübersicht als Liste -->
     <section class="map-container">
       <h2>Übersicht der Länder mit Freiheitswerten (2023)</h2>
-      <p>Die folgende Tabelle listet alle europäischen Länder mit ihrem Freiheitsscore (0–100) und dem Status laut Freedom House Report 2023:</p>
+      <p>Die folgende Tabelle listet alle europäischen Länder mit ihrem Freiheitsscore (0 – 100) und dem Status laut Freedom House Report 2023:</p>
       <ul>
         <li>Albanien – 61 – teilweise frei</li>
         <li>Andorra – 95 – frei</li>
@@ -468,7 +498,7 @@
   </main>
 
   <footer>
-    <p>&copy; 2025 Assignment 3 | Akademische Nutzung</p>
+    <p>© 2025 Assignment 3 | Akademische Nutzung</p>
     <p class="credits">Oguzhan Eraslan | 12307544 | VU Multimedia Cartography</p>
   </footer>
 
@@ -480,13 +510,13 @@
 
   <script>
     // 1) Wir definieren alle Icon-Varianten (klein und groß) für die drei Status.
-    //    Das verhindert, dass Marker "hüpfen" – wir tauschen nur die Icon-Größe aus.
-    const iconSmallFree       = L.icon({ iconUrl: "images/icon_free.png",       iconSize: [16, 16], iconAnchor: [8, 8], popupAnchor: [0, -8] });
-    const iconLargeFree       = L.icon({ iconUrl: "images/icon_free.png",       iconSize: [24, 24], iconAnchor: [12, 12], popupAnchor: [0, -12] });
-    const iconSmallPartly     = L.icon({ iconUrl: "images/icon_partly_free.png", iconSize: [16, 16], iconAnchor: [8, 8], popupAnchor: [0, -8] });
-    const iconLargePartly     = L.icon({ iconUrl: "images/icon_partly_free.png", iconSize: [24, 24], iconAnchor: [12, 12], popupAnchor: [0, -12] });
-    const iconSmallNot        = L.icon({ iconUrl: "images/icon_not_free.png",    iconSize: [16, 16], iconAnchor: [8, 8], popupAnchor: [0, -8] });
-    const iconLargeNot        = L.icon({ iconUrl: "images/icon_not_free.png",    iconSize: [24, 24], iconAnchor: [12, 12], popupAnchor: [0, -12] });
+    //    So springen die Marker nicht, sondern wir wechseln nur die Größe.
+    const iconSmallFree   = L.icon({ iconUrl: "images/icon_free.png",       iconSize: [16, 16], iconAnchor: [8, 8], popupAnchor: [0, -8] });
+    const iconLargeFree   = L.icon({ iconUrl: "images/icon_free.png",       iconSize: [24, 24], iconAnchor: [12, 12], popupAnchor: [0, -12] });
+    const iconSmallPartly = L.icon({ iconUrl: "images/icon_partly_free.png", iconSize: [16, 16], iconAnchor: [8, 8], popupAnchor: [0, -8] });
+    const iconLargePartly = L.icon({ iconUrl: "images/icon_partly_free.png", iconSize: [24, 24], iconAnchor: [12, 12], popupAnchor: [0, -12] });
+    const iconSmallNot    = L.icon({ iconUrl: "images/icon_not_free.png",    iconSize: [16, 16], iconAnchor: [8, 8], popupAnchor: [0, -8] });
+    const iconLargeNot    = L.icon({ iconUrl: "images/icon_not_free.png",    iconSize: [24, 24], iconAnchor: [12, 12], popupAnchor: [0, -12] });
 
     function getSmallIcon(status) {
       if (status === "frei")           return iconSmallFree;
@@ -577,8 +607,10 @@
         icon: getSmallIcon(country.status)
       }).addTo(map);
 
-      marker.bindPopup(`<h3>${country.name}</h3>
-                       <p>Status: ${country.status}<br>Score: ${country.score}</p>`);
+      marker.bindPopup(
+        `<h3>${country.name}</h3>
+         <p>Status: ${country.status}<br>Score: ${country.score}</p>`
+      );
 
       // b) Klick → Popup, Zoom, Icon in "aktiv" wechseln
       marker.on('click', function(e) {
@@ -587,14 +619,15 @@
 
         // Vorherigen Marker zurücksetzen
         if (activeMarker && activeMarker !== marker) {
-          const oldStatus = activeMarker.options.icon.options.iconUrl.includes("partly")
-            ? "teilweise frei"
-            : (activeMarker.options.icon.options.iconUrl.includes("not") ? "nicht frei" : "frei");
+          const oldUrl = activeMarker.options.icon.options.iconUrl;
+          let oldStatus = "frei";
+          if (oldUrl.includes("partly")) oldStatus = "teilweise frei";
+          else if (oldUrl.includes("not")) oldStatus = "nicht frei";
           activeMarker.setIcon(getSmallIcon(oldStatus));
           activeMarker.closePopup();
         }
 
-        // Eigener Status toggeln
+        // Eigene Aktiv-Logik toggeln
         if (activeMarker === marker) {
           marker.setIcon(getSmallIcon(country.status));
           marker.closePopup();
@@ -606,14 +639,14 @@
         }
       });
 
-      // c) Hover → Großes Icon anzeigen (temporär)
+      // c) Hover → Temporär großes Icon anzeigen
       marker.on('mouseover', function() {
         if (activeMarker !== marker) {
           marker.setIcon(getLargeIcon(country.status));
         }
       });
 
-      // d) Mouseout → Kleines Icon zurück, falls nicht aktiv
+      // d) Mouseout → Zurück auf kleines Icon, falls nicht aktiv
       marker.on('mouseout', function() {
         if (activeMarker !== marker) {
           marker.setIcon(getSmallIcon(country.status));
@@ -621,8 +654,7 @@
       });
     });
 
-    // 5) Wenn die Karte (z. B. nach Scrollen oder nach kurzer Zeit) zuerst versteckt war,
-    //    geht Leaflet manchmal von Null-Höhe aus. Wir zwingen eine Größen-Anpassung:
+    // 5) Leaflet: Nachträglich die Größe erzwingen, falls Karte anfangs versteckt war
     map.whenReady(() => {
       map.invalidateSize();
     });
@@ -630,10 +662,9 @@
       map.invalidateSize();
     });
 
-    // 6) Klick auf blaues Rechteck scrollt zur Leaflet-Karte
+    // 6) Klick auf blaues Rechteck → Scroll zur Leaflet-Karte + invalidateSize
     document.getElementById("manual-rect").addEventListener("click", () => {
       document.getElementById("leaflet-section").scrollIntoView({ behavior: "smooth" });
-      // Nach dem Scrollen nochmal sicherstellen, dass Leaflet neu zeichnet:
       setTimeout(() => map.invalidateSize(), 300);
     });
   </script>
@@ -652,7 +683,7 @@
         const pw = popup.offsetWidth,
               ph = popup.offsetHeight;
         popup.style.top  = (marker.offsetTop - ph - 8) + 'px';
-        popup.style.left = (marker.offsetLeft - pw/2 + marker.offsetWidth/2) + 'px';
+        popup.style.left = (marker.offsetLeft - pw / 2 + marker.offsetWidth / 2) + 'px';
         popup.style.display = 'block';
 
         document.addEventListener('click', function handler(ev) {
