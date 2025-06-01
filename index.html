@@ -15,11 +15,11 @@
 
   <style>
     :root {
-      --color-free: #2ecc71;           /* Seite: Farbe für „Frei“-Status */
-      --color-partly-free: #f1c40f;    /* Seite: Farbe für „Teilweise frei“-Status */
-      --color-not-free: #bc4ec6;       /* Seite: Farbe für „Nicht frei“-Status */
-      --color-dark: #232323;           /* Footer-Hintergrundfarbe */
-      --color-light: #f9f9f9;          /* Karten-Hintergrundfarbe */
+      --color-free: #2ecc71; /* Seite: Farbe für „Frei“-Status */
+      --color-partly-free: #f1c40f; /* Seite: Farbe für „Teilweise frei“-Status */
+      --color-not-free: #bc4ec6; /* Seite: Farbe für „Nicht frei“-Status */
+      --color-dark: #232323;  /* Footer-Hintergrundfarbe */
+      --color-light: #f9f9f9; /* Karten-Hintergrundfarbe */
       --shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Schatten für Karten-Container */
     }
 
@@ -28,15 +28,15 @@
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
       background-image: url("images/background-image.jpg");
-      background-size: cover;         /* Hintergrundbild skaliert, um den Viewport zu füllen */
-      background-position: center;    /* zentriert das Hintergrundbild */
+      background-size: cover;  /* Hintergrundbild skaliert, um den Viewport zu füllen */
+      background-position: center; /* zentriert das Hintergrundbild */
       /* Hinweis: „background-attachment: scroll“ statt „fixed“ → iOS-kompatibel */
       background-attachment: scroll;
       background-repeat: no-repeat;
       color: #333;
       display: flex;
       flex-direction: column;
-      min-height: 100vh;              /* Body mindestens Viewport-Höhe */
+      min-height: 100vh;  /* Body mindestens Viewport-Höhe */
     }
 
     /* ---------------------- Navigation ---------------------- */
@@ -44,7 +44,7 @@
       background-color: rgba(255, 255, 255, 0.95); /* leicht transparent für Hintergrund-Bild */
       padding: 1rem 20px;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-      position: sticky;              /* bleibt am oberen Rand kleben */
+      position: sticky;  /* bleibt am oberen Rand kleben */
       top: 0;
       z-index: 100;
     }
@@ -53,9 +53,9 @@
       margin: 0;
       padding: 0;
       display: flex;
-      justify-content: center;       /* Links zentrieren */
+      justify-content: center;  /* Links zentrieren */
       gap: 2rem;
-      flex-wrap: wrap;               /* Umbruch bei schmalen Ansichten */
+      flex-wrap: wrap;  /* Umbruch bei schmalen Ansichten */
     }
     nav a {
       color: #333;
@@ -66,24 +66,24 @@
       transition: background-color 0.3s ease;
     }
     nav a:hover {
-      background-color: #f0f0f0;      /* Hover-Effekt leichte Aufhellung */
+      background-color: #f0f0f0; /* Hover-Effekt leichte Aufhellung */
     }
     nav a.active {
-      color: #007bff;                 /* aktiv – blau */
-      background-color: #e7f3ff;      /* aktiv – zartes Blau */
+      color: #007bff;  /* aktiv – blau */
+      background-color: #e7f3ff; /* aktiv – zartes Blau */
     }
 
     /* ---------------------- Hauptbereich ---------------------- */
     main {
       padding: 20px;
-      max-width: 1000px;              /* zentrierter Inhalt, max-Breite */
+      max-width: 1000px; /* zentrierter Inhalt, max-Breite */
       margin: 2rem auto;
       background: rgba(255, 255, 255, 0.85);
       border-radius: 12px;
       box-shadow: var(--shadow);
       text-align: center;
-      backdrop-filter: blur(4px);     /* milder Blur-Effekt im Hintergrund */
-      flex: 1;                        /* füllt verfügbare Höhe */
+      backdrop-filter: blur(4px);  /* milder Blur-Effekt im Hintergrund */
+      flex: 1; /* füllt verfügbare Höhe */
       color: #333;
     }
 
@@ -100,8 +100,8 @@
     /* Leaflet-Karte */
     #leaflet-map {
       width: 100%;
-      height: 500px;                  /* Standardhöhe */
-      min-height: 300px;              /* damit auf kleinen Bildschirmen sichtbar */
+      height: 500px;  /* Standardhöhe */
+      min-height: 300px;  /* damit auf kleinen Bildschirmen sichtbar */
       border: 1px solid #ddd;
       background-color: var(--color-light);
       border-radius: 8px;
@@ -150,7 +150,7 @@
     /* Marker-Punkte */
     .manual-map .marker {
       position: absolute;
-      width: 10px;             /* Standardgröße */
+      width: 10px;  /* Standardgröße */
       height: 10px;
       background-color: #d62828;
       border-radius: 50%;
@@ -160,7 +160,7 @@
       transition: transform 0.2s;
     }
     .manual-map .marker:hover {
-      transform: scale(1.4);   /* leichtes Vergrößern bei Hover */
+      transform: scale(1.4);  /* leichtes Vergrößern bei Hover */
     }
     /* Popup-Box */
     .manual-map .popup {
@@ -169,11 +169,11 @@
       border: 1px solid #ccc;
       padding: 10px;
       border-radius: 6px;
-      max-width: 220px;        /* max-Breite Desktop */
+      max-width: 220px;  /* max-Breite Desktop */
       font-size: 0.9em;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       z-index: 30;
-      display: none;           /* erscheint nur beim Klick */
+      display: none;   /* erscheint nur beim Klick */
     }
     /* Rechteck für Europa (manuell) */
     #manual-rect {
@@ -236,7 +236,7 @@
         padding: 0.5rem;
       }
       #leaflet-map {
-        height: 400px;           /* Leaflet-Karte etwas niedriger */
+        height: 400px; /* Leaflet-Karte etwas niedriger */
       }
       .manual-map {
         max-width: 100%;
@@ -254,7 +254,7 @@
     /* 2. Breakpoint: Mobile / sehr schmale Breite */
     @media (max-width: 500px) {
       nav ul {
-        flex-direction: column;   /* Navigation wird vertikal */
+        flex-direction: column; /* Navigation wird vertikal */
         gap: 1rem;
       }
       nav a {
@@ -262,13 +262,13 @@
         text-align: center;
       }
       h1 {
-        font-size: 1.5rem;        /* Überschrift mobil verkleinert */
+        font-size: 1.5rem; /* Überschrift mobil verkleinert */
       }
       h2 {
         font-size: 1.2rem;
       }
       #leaflet-map {
-        height: 300px;            /* Leaflet-Karte mobil höher anpassen */
+        height: 300px;  /* Leaflet-Karte mobil höher anpassen */
       }
       /* Legende der manuellen Karte mobil ausblenden */
       .legend-manual {
@@ -313,9 +313,8 @@
   <nav>
     <ul>
       <li><a href="#" class="active">Freiheitskarte</a></li>
-      <!-- Links nur auf Desktop -->
-      <li class="low-res-only"><a href="#">Über</a></li>
-      <li class="low-res-only"><a href="#">Kontakt</a></li>
+      <li><a href="#" class="active">Methodik</a></li>
+      <li><a href="#" class="active">Kontakt</a></li>
     </ul>
   </nav>
 
@@ -330,8 +329,10 @@
       <h3>Excellence Features:</h3>
       <ul>
         <li>Interaktive Leaflet-Karte mit benutzerdefinierten Markern und Popups</li>
-        <li>Marker-Icons wechseln Größe bei Hover/Klick (kein Springen)</li>
+        <li>Marker-Icons wechseln Größe bei Hover/Klick</li>
         <li>Rechteck für Europa in beiden Karten</li>
+        <li>Legende unterschiedlich sichtbar auf Desktop/Mobil</li>
+        <li>Design: modern, sauber, Schatteneffekte, Blur</li>
         <li>Responsive Images (Lecture 5) via <code>srcset</code> und <code>sizes</code></li>
       </ul>
     </div>
@@ -371,7 +372,7 @@
              data-text='Landwirte blockieren Autobahnen und fordern mehr Unterstützung durch die Regierung.<br><a href="https://www.tagesschau.de/ausland/frankreich-bauernproteste-mercosur-100.html" target="_blank">Zur Meldung</a>'>
         </div>
 
-        <!-- Blaues Rechteck → Scroll zur Leaflet-Karte -->
+        <!-- Blaues Rechteck -> scrollt zur Leaflet-Karte -->
         <div id="manual-rect" title="Zur interaktiven Karte scrollen"></div>
       </div>
 
@@ -499,7 +500,7 @@
 
   <script>
     // 1) Definition der Icon-Varianten (klein + groß) für die drei Status
-    //    → Verhindert, dass Marker „hüpfen“, wir wechseln nur die Größe.
+    //    -> Verhindert, dass Marker „hüpfen“, wechseln nur die Größe.
     const iconSmallFree   = L.icon({ iconUrl: "images/icon_free.png",       iconSize: [16, 16], iconAnchor: [8, 8], popupAnchor: [0, -8] });
     const iconLargeFree   = L.icon({ iconUrl: "images/icon_free.png",       iconSize: [24, 24], iconAnchor: [12, 12], popupAnchor: [0, -12] });
     const iconSmallPartly = L.icon({ iconUrl: "images/icon_partly_free.png", iconSize: [16, 16], iconAnchor: [8, 8], popupAnchor: [0, -8] });
@@ -601,7 +602,7 @@
          <p>Status: ${country.status}<br>Score: ${country.score}</p>`
       );
 
-      // b) Klick → Popup, Zoom, Icon in "aktiv" → groß
+      // b) Klick -> Popup, Zoom, Icon in "aktiv" -> groß
       marker.on('click', function(e) {
         map.setView(e.latlng, 6);
         this.openPopup();
@@ -628,14 +629,14 @@
         }
       });
 
-      // c) Hover → Temporär großes Icon anzeigen
+      // c) Hover -> Temporär großes Icon anzeigen
       marker.on('mouseover', function() {
         if (activeMarker !== marker) {
           marker.setIcon(getLargeIcon(country.status));
         }
       });
 
-      // d) Mouseout → Kleines Icon zurück
+      // d) Mouseout -> Kleines Icon zurück
       marker.on('mouseout', function() {
         if (activeMarker !== marker) {
           marker.setIcon(getSmallIcon(country.status));
@@ -643,7 +644,7 @@
       });
     });
 
-    // 5) Leaflet: invalidateSize → notwendig, falls Karte zuvor versteckt war
+    // 5) Leaflet: invalidateSize -> notwendig, falls Karte zuvor versteckt war
     map.whenReady(() => {
       map.invalidateSize();
     });
@@ -651,7 +652,7 @@
       map.invalidateSize();
     });
 
-    // 6) Klick auf blaues Rechteck → Scroll zur Leaflet-Karte + Größe erzwingen
+    // 6) Klick auf blaues Rechteck -> scrollt zur Leaflet-Karte + Größe erzwingen
     document.getElementById("manual-rect").addEventListener("click", () => {
       document.getElementById("leaflet-section").scrollIntoView({ behavior: "smooth" });
       setTimeout(() => map.invalidateSize(), 300);
@@ -676,7 +677,7 @@
         popup.style.left = (marker.offsetLeft - pw / 2 + marker.offsetWidth / 2) + 'px';
         popup.style.display = 'block';
 
-        // Klick außerhalb → Popup schließen
+        // Klick außerhalb -> Popup schließen
         document.addEventListener('click', function handler(ev) {
           if (!popup.contains(ev.target)) {
             popup.remove();
