@@ -6,7 +6,7 @@
   <meta name="description" content="Karte der politischen Freiheiten nach dem Freedom in the World Report" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Leaflet CSS -->
+  <!-- Leaflet CSS (für interaktive Karte) -->
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -15,50 +15,48 @@
 
   <style>
     :root {
-      --color-free: #2ecc71;
-      --color-partly-free: #f1c40f;
-      --color-not-free: #bc4ec6;
-      --color-dark: #232323;
-      --color-light: #f9f9f9;
-      --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      --color-free: #2ecc71;           /* Seite: Farbe für „Frei“-Status */
+      --color-partly-free: #f1c40f;    /* Seite: Farbe für „Teilweise frei“-Status */
+      --color-not-free: #bc4ec6;       /* Seite: Farbe für „Nicht frei“-Status */
+      --color-dark: #232323;           /* Footer-Hintergrundfarbe */
+      --color-light: #f9f9f9;          /* Karten-Hintergrundfarbe */
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Schatten für Karten-Container */
     }
 
-    /* Grundlayout */
+    /* ---------------------- Grundlayout ---------------------- */
     body {
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
       background-image: url("images/background-image.jpg");
-      background-size: cover;
-      background-position: center;
-      /* iOS-kompatibel: scroll statt fixed */
+      background-size: cover;         /* Hintergrundbild skaliert, um den Viewport zu füllen */
+      background-position: center;    /* zentriert das Hintergrundbild */
+      /* Hinweis: „background-attachment: scroll“ statt „fixed“ → iOS-kompatibel */
       background-attachment: scroll;
       background-repeat: no-repeat;
       color: #333;
       display: flex;
       flex-direction: column;
-      min-height: 100vh;
+      min-height: 100vh;              /* Body mindestens Viewport-Höhe */
     }
 
-    /* Navigation */
+    /* ---------------------- Navigation ---------------------- */
     nav {
-      background-color: rgba(255, 255, 255, 0.95);
+      background-color: rgba(255, 255, 255, 0.95); /* leicht transparent für Hintergrund-Bild */
       padding: 1rem 20px;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-      position: sticky;
+      position: sticky;              /* bleibt am oberen Rand kleben */
       top: 0;
       z-index: 100;
     }
-
     nav ul {
       list-style: none;
       margin: 0;
       padding: 0;
       display: flex;
-      justify-content: center;
+      justify-content: center;       /* Links zentrieren */
       gap: 2rem;
-      flex-wrap: wrap;
+      flex-wrap: wrap;               /* Umbruch bei schmalen Ansichten */
     }
-
     nav a {
       color: #333;
       text-decoration: none;
@@ -67,31 +65,29 @@
       border-radius: 5px;
       transition: background-color 0.3s ease;
     }
-
     nav a:hover {
-      background-color: #f0f0f0;
+      background-color: #f0f0f0;      /* Hover-Effekt leichte Aufhellung */
     }
-
     nav a.active {
-      color: #007bff;
-      background-color: #e7f3ff;
+      color: #007bff;                 /* aktiv – blau */
+      background-color: #e7f3ff;      /* aktiv – zartes Blau */
     }
 
-    /* Hauptbereich */
+    /* ---------------------- Hauptbereich ---------------------- */
     main {
       padding: 20px;
-      max-width: 1000px;
+      max-width: 1000px;              /* zentrierter Inhalt, max-Breite */
       margin: 2rem auto;
       background: rgba(255, 255, 255, 0.85);
       border-radius: 12px;
       box-shadow: var(--shadow);
       text-align: center;
-      backdrop-filter: blur(4px);
-      flex: 1;
+      backdrop-filter: blur(4px);     /* milder Blur-Effekt im Hintergrund */
+      flex: 1;                        /* füllt verfügbare Höhe */
       color: #333;
     }
 
-    /* Kartencontainer */
+    /* ---------------------- Kartencontainer ---------------------- */
     .map-container {
       margin: 2rem auto;
       padding: 1rem;
@@ -104,28 +100,25 @@
     /* Leaflet-Karte */
     #leaflet-map {
       width: 100%;
-      height: 500px;       /* Standardhöhe */
-      min-height: 300px;   /* Sichtbarkeit auf sehr kleinen Bildschirmen */
+      height: 500px;                  /* Standardhöhe */
+      min-height: 300px;              /* damit auf kleinen Bildschirmen sichtbar */
       border: 1px solid #ddd;
       background-color: var(--color-light);
       border-radius: 8px;
     }
-
-    /* Popup-Inhalt */
     .leaflet-popup-content {
       min-width: 150px;
       margin: 10px;
       color: #333;
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     }
-
     .leaflet-popup-content h3 {
       margin-top: 0;
       color: #2c3e50;
       font-size: 1.2em;
     }
 
-    /* Footer */
+    /* ---------------------- Footer ---------------------- */
     footer {
       text-align: center;
       padding: 15px;
@@ -133,12 +126,11 @@
       color: var(--color-light);
       font-size: 0.8em;
     }
-
     .credits {
       font-style: italic;
     }
 
-    /* Erste Karte (manuell) */
+    /* ---------------------- Manuelle Karte ---------------------- */
     .manual-map {
       position: relative;
       width: 100%;
@@ -149,18 +141,16 @@
       overflow: hidden;
       background: #fff;
     }
-
-    /* Das Bild selbst */
+    /* Basis-Bild */
     .manual-map img.base-map {
       width: 100%;
       height: auto;
       display: block;
     }
-
-    /* Marker-Punkte (manuell) */
+    /* Marker-Punkte */
     .manual-map .marker {
       position: absolute;
-      width: 10px;
+      width: 10px;             /* Standardgröße */
       height: 10px;
       background-color: #d62828;
       border-radius: 50%;
@@ -169,26 +159,23 @@
       z-index: 20;
       transition: transform 0.2s;
     }
-
     .manual-map .marker:hover {
-      transform: scale(1.4);
+      transform: scale(1.4);   /* leichtes Vergrößern bei Hover */
     }
-
-    /* Popup der manuellen Karte */
+    /* Popup-Box */
     .manual-map .popup {
       position: absolute;
       background: #fff;
       border: 1px solid #ccc;
       padding: 10px;
       border-radius: 6px;
-      max-width: 220px;
+      max-width: 220px;        /* max-Breite Desktop */
       font-size: 0.9em;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       z-index: 30;
-      display: none;
+      display: none;           /* erscheint nur beim Klick */
     }
-
-    /* Blaues Rechteck für Europa (manuell) */
+    /* Rechteck für Europa (manuell) */
     #manual-rect {
       position: absolute;
       top: 5%;
@@ -201,12 +188,11 @@
       transition: background-color 0.3s ease;
       z-index: 10;
     }
-
     #manual-rect:hover {
       background: rgba(0, 0, 255, 0.15);
     }
 
-    /* Legenden */
+    /* ---------------------- Legenden ---------------------- */
     .legend {
       margin-top: 1rem;
       background: rgba(255, 255, 255, 0.8);
@@ -215,25 +201,21 @@
       display: inline-block;
       text-align: left;
     }
-
     .legend ul {
       list-style: none;
       padding: 0;
       margin: 0;
     }
-
     .legend li {
       display: flex;
       align-items: center;
       gap: 0.5rem;
       margin-bottom: 0.5rem;
     }
-
     .legend-icon {
       width: 16px;
       height: 16px;
     }
-
     .legend-box {
       width: 16px;
       height: 16px;
@@ -242,7 +224,7 @@
       box-sizing: border-box;
     }
 
-    /* Responsive Design: Lecture 5 */
+    /* ---------------------- Responsive Design (Lecture 5) ---------------------- */
 
     /* 1. Breakpoint: Tablet / mittlere Breite */
     @media (max-width: 800px) {
@@ -254,16 +236,16 @@
         padding: 0.5rem;
       }
       #leaflet-map {
-        height: 400px;
+        height: 400px;           /* Leaflet-Karte etwas niedriger */
       }
       .manual-map {
         max-width: 100%;
       }
-      /* Legende der manuellen Karte verkleinern */
+      /* Legende der manuellen Karte etwas kleiner */
       .legend-manual {
         font-size: 0.9em;
       }
-      /* HiDPI-Bilder (falls vorhanden) ausblenden */
+      /* HiDPI-Bilder ausblenden, falls nicht gewünscht */
       .high-res-only {
         display: none;
       }
@@ -272,7 +254,7 @@
     /* 2. Breakpoint: Mobile / sehr schmale Breite */
     @media (max-width: 500px) {
       nav ul {
-        flex-direction: column;
+        flex-direction: column;   /* Navigation wird vertikal */
         gap: 1rem;
       }
       nav a {
@@ -280,15 +262,15 @@
         text-align: center;
       }
       h1 {
-        font-size: 1.5rem;
+        font-size: 1.5rem;        /* Überschrift mobil verkleinert */
       }
       h2 {
         font-size: 1.2rem;
       }
       #leaflet-map {
-        height: 300px;
+        height: 300px;            /* Leaflet-Karte mobil höher anpassen */
       }
-      /* Legende der manuellen Karte auf Mobile ausblenden */
+      /* Legende der manuellen Karte mobil ausblenden */
       .legend-manual {
         display: none;
       }
@@ -297,13 +279,18 @@
         display: inline-block;
         font-size: 0.9em;
       }
-      /* Marker der manuellen Karte kleiner machen */
+      /* Marker-Punkte manuell noch kleiner */
       .manual-map .marker {
         width: 6px;
         height: 6px;
       }
       .manual-map .marker:hover {
         transform: scale(1.4);
+      }
+      /* Popup auf Mobil verkleinern */
+      .manual-map .popup {
+        max-width: 150px;
+        font-size: 0.8em;
       }
       ul {
         padding-left: 1rem;
@@ -326,7 +313,7 @@
   <nav>
     <ul>
       <li><a href="#" class="active">Freiheitskarte</a></li>
-      <!-- Diese Links erscheinen nur auf größeren Displays -->
+      <!-- Links nur auf Desktop -->
       <li class="low-res-only"><a href="#">Über</a></li>
       <li class="low-res-only"><a href="#">Kontakt</a></li>
     </ul>
@@ -384,10 +371,11 @@
              data-text='Landwirte blockieren Autobahnen und fordern mehr Unterstützung durch die Regierung.<br><a href="https://www.tagesschau.de/ausland/frankreich-bauernproteste-mercosur-100.html" target="_blank">Zur Meldung</a>'>
         </div>
 
+        <!-- Blaues Rechteck → Scroll zur Leaflet-Karte -->
         <div id="manual-rect" title="Zur interaktiven Karte scrollen"></div>
       </div>
 
-      <!-- Legende für die manuelle Karte -->
+      <!-- Legende für manuelle Karte -->
       <div class="legend legend-manual">
         <h3>Legende (Manuelle Karte)</h3>
         <ul>
@@ -412,7 +400,7 @@
       <h2>Politische Freiheit in Europa</h2>
       <div id="leaflet-map"></div>
 
-      <!-- Legende für die Leaflet-Karte -->
+      <!-- Legende für Leaflet-Karte -->
       <div class="legend legend-leaflet">
         <h3>Legende (Leaflet-Karte)</h3>
         <ul>
@@ -493,6 +481,7 @@
     <section class="data-disclaimer">
       <h2>Datenquellen</h2>
       <p>Daten von <a href="https://freedomhouse.org/country/scores" target="_blank">Freedom House</a> (Lizenz: <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC-BY-NC-ND 4.0</a>).</p>
+      <p>Erste Map von <a href="https://commons.wikimedia.org/wiki/File:2023_Freedom_in_the_World.png" target="_blank">ProjectHorizons</a> (Lizenz: <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-SA 4.0</a>).</p>
       <p>Hintergrund von <a href="https://www.flickr.com/photos/152975694@N02/36401449295" target="_blank">BMN Network</a> (Lizenz: <a href="https://creativecommons.org/licenses/by/2.0/" target="_blank">CC-BY 2.0</a>).</p>
     </section>
   </main>
@@ -502,15 +491,15 @@
     <p class="credits">Oguzhan Eraslan | 12307544 | VU Multimedia Cartography</p>
   </footer>
 
-  <!-- Leaflet JS -->
+  <!-- Leaflet JS (für interaktive Karte) -->
   <script
     src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
     crossorigin=""
   ></script>
 
   <script>
-    // 1) Wir definieren alle Icon-Varianten (klein und groß) für die drei Status.
-    //    So springen die Marker nicht, sondern wir wechseln nur die Größe.
+    // 1) Definition der Icon-Varianten (klein + groß) für die drei Status
+    //    → Verhindert, dass Marker „hüpfen“, wir wechseln nur die Größe.
     const iconSmallFree   = L.icon({ iconUrl: "images/icon_free.png",       iconSize: [16, 16], iconAnchor: [8, 8], popupAnchor: [0, -8] });
     const iconLargeFree   = L.icon({ iconUrl: "images/icon_free.png",       iconSize: [24, 24], iconAnchor: [12, 12], popupAnchor: [0, -12] });
     const iconSmallPartly = L.icon({ iconUrl: "images/icon_partly_free.png", iconSize: [16, 16], iconAnchor: [8, 8], popupAnchor: [0, -8] });
@@ -518,7 +507,7 @@
     const iconSmallNot    = L.icon({ iconUrl: "images/icon_not_free.png",    iconSize: [16, 16], iconAnchor: [8, 8], popupAnchor: [0, -8] });
     const iconLargeNot    = L.icon({ iconUrl: "images/icon_not_free.png",    iconSize: [24, 24], iconAnchor: [12, 12], popupAnchor: [0, -12] });
 
-    function getSmallIcon(status) {
+    function getSmallIcon(status) { 
       if (status === "frei")           return iconSmallFree;
       if (status === "teilweise frei") return iconSmallPartly;
                                         return iconSmallNot;
@@ -532,13 +521,13 @@
     // 2) Leaflet-Karte initialisieren
     const map = L.map("leaflet-map").setView([52.2, 15.2], 4);
 
-    // OSM-Tiles
+    // OSM-Tiles hinzufügen
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 18,
       attribution: '© OpenStreetMap-Mitwirkende | Datenquelle: Freedom House Report 2023',
     }).addTo(map);
 
-    // Bounding Box Europa
+    // Bounding Box für Europa (blaues Rechteck)
     const europeBounds = [[32, -25], [72, 50]];
     L.rectangle(europeBounds, {
       color: "blue",
@@ -546,7 +535,7 @@
       fillOpacity: 0.05
     }).addTo(map).bindPopup("Europäischer Kontinent");
 
-    // 3) Liste aller europäischen Länder (mit Koordinaten, Status, Score)
+    // 3) Liste aller europäischen Länder (Koordinaten, Status, Score)
     const europeCountries = [
       { name: 'Albanien', coords: [41.1, 20.0], status: 'teilweise frei', score: 61 },
       { name: 'Andorra', coords: [42.55, 1.6], status: 'frei', score: 95 },
@@ -599,7 +588,7 @@
       { name: 'Zypern', coords: [35.0, 33.3], status: 'frei', score: 95 },
     ];
 
-    // 4) Marker anlegen und Hover-/Click-Logik
+    // 4) Marker anlegen + Hover-/Click-Logik (Leaflet)
     let activeMarker = null;
     europeCountries.forEach((country) => {
       // a) Kleines Icon initial
@@ -612,7 +601,7 @@
          <p>Status: ${country.status}<br>Score: ${country.score}</p>`
       );
 
-      // b) Klick → Popup, Zoom, Icon in "aktiv" wechseln
+      // b) Klick → Popup, Zoom, Icon in "aktiv" → groß
       marker.on('click', function(e) {
         map.setView(e.latlng, 6);
         this.openPopup();
@@ -627,7 +616,7 @@
           activeMarker.closePopup();
         }
 
-        // Eigene Aktiv-Logik toggeln
+        // Toggle: Wenn bereits aktiv, wieder zurücksetzen
         if (activeMarker === marker) {
           marker.setIcon(getSmallIcon(country.status));
           marker.closePopup();
@@ -646,7 +635,7 @@
         }
       });
 
-      // d) Mouseout → Zurück auf kleines Icon, falls nicht aktiv
+      // d) Mouseout → Kleines Icon zurück
       marker.on('mouseout', function() {
         if (activeMarker !== marker) {
           marker.setIcon(getSmallIcon(country.status));
@@ -654,7 +643,7 @@
       });
     });
 
-    // 5) Leaflet: Nachträglich die Größe erzwingen, falls Karte anfangs versteckt war
+    // 5) Leaflet: invalidateSize → notwendig, falls Karte zuvor versteckt war
     map.whenReady(() => {
       map.invalidateSize();
     });
@@ -662,7 +651,7 @@
       map.invalidateSize();
     });
 
-    // 6) Klick auf blaues Rechteck → Scroll zur Leaflet-Karte + invalidateSize
+    // 6) Klick auf blaues Rechteck → Scroll zur Leaflet-Karte + Größe erzwingen
     document.getElementById("manual-rect").addEventListener("click", () => {
       document.getElementById("leaflet-section").scrollIntoView({ behavior: "smooth" });
       setTimeout(() => map.invalidateSize(), 300);
@@ -670,7 +659,7 @@
   </script>
 
   <script>
-    // 7) Interaktive Popups für die manuelle Karte
+    // 7) Interaktive Popups für die manuelle Karte (HTML-Overlays)
     document.querySelectorAll('.manual-map .marker').forEach(marker => {
       marker.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -682,10 +671,12 @@
 
         const pw = popup.offsetWidth,
               ph = popup.offsetHeight;
+        // Popup zentriert über dem Marker positionieren
         popup.style.top  = (marker.offsetTop - ph - 8) + 'px';
         popup.style.left = (marker.offsetLeft - pw / 2 + marker.offsetWidth / 2) + 'px';
         popup.style.display = 'block';
 
+        // Klick außerhalb → Popup schließen
         document.addEventListener('click', function handler(ev) {
           if (!popup.contains(ev.target)) {
             popup.remove();
