@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>Freedom in the World Report | Politische Freiheiten in Europa</title>
+  <meta name="description" content="Karte der politischen Freiheiten nach dem Freedom in the World Report" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    crossorigin=""
+  />
+
+  <style>
+    :root {
+      --color-free: #2ecc71;
+      --color-partly-free: #f1c40f;
+      --color-not-free: #bc4ec6;
+      --color-dark: #232323;
+      --color-light: #f9f9f9;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Grundlayout */
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      background-image: url("images/background-image.jpg");
+      background-size: cover;
+      background-position: center;
+      /* iOS-kompatibel: scroll statt fixed */
+      background-attachment: scroll;
+      background-repeat: no-repeat;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Navigation */
+    nav {
+      background-color: rgba(255, 255, 255, 0.95);
+      padding: 1rem 20px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    nav ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    nav a {
+      color: #333;
+      text-decoration: none;
+      font-weight: bold;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+    }
+
+    nav a:hover {
+      background-color: #f0f0f0;
+    }
+
+    nav a.active {
+      color: #007bff;
+      background-color: #e7f3ff;
+    }
+
+    /* Hauptbereich */
+    main {
+      padding: 20px;
+      max-width: 1000px;
+      margin: 2rem auto;
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      text-align: center;
+      backdrop-filter: blur(4px);
+      flex: 1;
+      color: #333;
+    }
+
+    /* Kartencontainer */
+    .map-container {
+      margin: 2rem auto;
+      padding: 1rem;
+      background-color: var(--color-light);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      max-width: 800px;
+    }
+
+    /* Leaflet-Karte */
+    #leaflet-map {
+      width: 100%;
+      height: 500px;       /* Standardhöhe */
+      min-height: 300px;   /* Damit sie auch auf sehr engen Bildschirmen sichtbar bleibt */
+      border: 1px solid #ddd;
+      background-color: var(--color-light);
+      border-radius: 8px;
+    }
+
+    /* Popup-Inhalt */
+    .leaflet-popup-content {
+      min-width: 150px;
+      margin: 10px;
+      color: #333;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .leaflet-popup-content h3 {
+      margin-top: 0;
+      color: #2c3e50;
+      font-size: 1.2em;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 15px;
+      background: var(--color-dark);
+      color: var(--color-light);
+      font-size: 0.8em;
+    }
+
+    .credits {
+      font-style: italic;
+    }
+
+    /* Erste Karte (manuell) */
+    .manual-map {
+      position: relative;
+      width: 100%;
+      max-width: 800px;
+      margin: 1rem auto;
+      border: 2px solid #ccc;
+      border-radius: 6px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    /* Das Bild selbst */
+    .manual-map img.base-map {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* Marker-Punkte */
+    .manual-map .marker {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background-color: #d62828;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+      z-index: 20;
+      transition: transform 0.2s;
+    }
+
+    .manual-map .marker:hover {
+      transform: scale(1.4);
+    }
+
+    /* Popup der manuellen Karte */
+    .manual-map .popup {
+      position: absolute;
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 10px;
+      border-radius: 6px;
+      max-width: 220px;
+      font-size: 0.9em;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      z-index: 30;
+      display: none;
+    }
+
+    /* Blaues Rechteck für Europa (manuell) */
+    #manual-rect {
+      position: absolute;
+      top: 5%;
+      left: 42%;
+      width: 18%;
+      height: 24%;
+      border: 2px solid blue;
+      background: rgba(0, 0, 255, 0.05);
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      z-index: 10;
+    }
+
+    #manual-rect:hover {
+      background: rgba(0, 0, 255, 0.15);
+    }
+
+    /* Legende */
+    .legend {
+      margin-top: 1rem;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 15px;
+      border-radius: 5px;
+      display: inline-block;
+      text-align: left;
+    }
+
+    .legend ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .legend li {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .legend-icon {
+      width: 16px;
+      height: 16px;
+    }
+
+    .legend-box {
+      width: 16px;
+      height: 16px;
+      border: 2px solid blue;
+      background: rgba(0, 0, 255, 0.05);
+      box-sizing: border-box;
+    }
+
+    /* Responsive Design: Lecture 5 */
+    /* 1. Breakpoint: Tablet / mittlere Breite */
+    @media (max-width: 800px) {
+      main {
+        margin: 1rem;
+        padding: 15px;
+      }
+      .map-container {
+        padding: 0.5rem;
+      }
+      #leaflet-map {
+        height: 400px;
+      }
+      .manual-map {
+        max-width: 100%;
+      }
+      .legend {
+        font-size: 0.9em;
+      }
+      /* HiDPI-Bilder ausblenden, wenn wir sie nicht möchten */
+      .high-res-only {
+        display: none;
+      }
+    }
+
+    /* 2. Breakpoint: Mobile / sehr schmale Breite */
+    @media (max-width: 500px) {
+      nav ul {
+        flex-direction: column;
+        gap: 1rem;
+      }
+      nav a {
+        padding: 0.5rem;
+        text-align: center;
+      }
+      h1 {
+        font-size: 1.5rem;
+      }
+      h2 {
+        font-size: 1.2rem;
+      }
+      #leaflet-map {
+        height: 300px;
+      }
+      .legend {
+        display: none;
+      }
+      .manual-map {
+        border-width: 1px;
+      }
+      ul {
+        padding-left: 1rem;
+      }
+    }
+
+    /* 3. Breakpoint: Retina / HiDPI */
+    @media (min-resolution: 2dppx) {
+      .high-res-only {
+        display: block;
+      }
+      .low-res-only {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <nav>
+    <ul>
+      <li><a href="#" class="active">Freiheitskarte</a></li>
+      <!-- Diese Links erscheinen nur auf größeren Displays -->
+      <li class="low-res-only"><a href="#">Über</a></li>
+      <li class="low-res-only"><a href="#">Kontakt</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <h1>Freedom in the World Report</h1>
+    <p class="intro">
+      Der jährliche Bericht von Freedom House bewertet den Stand politischer
+      Freiheiten und bürgerlicher Rechte.
+    </p>
+
+    <div class="excellence">
+      <h3>Excellence Features:</h3>
+      <ul>
+        <li>Interaktive Leaflet-Karte mit benutzerdefinierten Markern und Popups</li>
+        <li>Marker-Icons wechseln Größe bei Hover/Klick (kein Springen)</li>
+        <li>Rechteck für Europa in beiden Karten</li>
+        <li>Responsive Images (Lecture 5) via <code>srcset</code> und <code>sizes</code></li>
+      </ul>
+    </div>
+
+    <!-- Erste Karte (manuell) -->
+    <section class="map-container">
+      <h2>Globaler Freiheitsindex 2023</h2>
+      <div class="manual-map">
+        <!-- RESPONSIVE IMAGE: srcset / sizes -->
+        <img
+          src="images/map.png"
+          srcset="
+            images/map-small.png  330w,
+            images/map-fallback.png 960w,
+            images/map-2x.png 1280w
+          "
+          sizes="
+            (max-width: 500px) 100vw,
+            (max-width: 800px) 640px,
+            800px
+          "
+          alt="Karte der politischen Freiheiten"
+          class="base-map"
+        />
+
+        <!-- Drei Marker-Punkte -->
+        <div class="marker" style="top: 24%; left: 58%;"
+             data-title="Georgien"
+             data-text='Massive Proteste in Tiflis gegen das umstrittene "russische Agentengesetz".<br><a href="https://www.derstandard.at/consent/tcf/story/3000000246988/eu-beitrittsverz246gerung-ausschreitungen-bei-protesten-in-georgien" target="_blank">Zur Meldung</a>'>
+        </div>
+        <div class="marker" style="top: 22%; left: 51.5%;"
+             data-title="Serbien"
+             data-text='Demonstrationen in Belgrad nach Gewaltvorfällen – Kritik an Regierung und Medien.<br><a href="https://www.zeit.de/politik/ausland/2025-05/serbien-massenproteste-studenten-gewerkschaften-belgrad" target="_blank">Zur Meldung</a>'>
+        </div>
+        <div class="marker" style="top: 19%; left: 47.5%;"
+             data-title="Frankreich"
+             data-text='Landwirte blockieren Autobahnen und fordern mehr Unterstützung durch die Regierung.<br><a href="https://www.tagesschau.de/ausland/frankreich-bauernproteste-mercosur-100.html" target="_blank">Zur Meldung</a>'>
+        </div>
+
+        <div id="manual-rect" title="Zur interaktiven Karte scrollen"></div>
+      </div>
+
+      <div class="legend">
+        <h3>Legende</h3>
+        <ul>
+          <li>
+            <img src="images/icon_free.png" class="legend-icon" /><strong>Frei</strong>
+          </li>
+          <li>
+            <img src="images/icon_partly_free.png" class="legend-icon" />
+            <strong>Teilweise frei</strong>
+          </li>
+          <li>
+            <img src="images/icon_not_free.png" class="legend-icon" />
+            <strong>Nicht frei</strong>
+          </li>
+          <li>
+            <div class="legend-box"></div>
+            <strong>Europäischer Kontinent</strong>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Zweite Karte (Leaflet) -->
+    <section id="leaflet-section" class="map-container">
+      <h2>Politische Freiheit in Europa</h2>
+      <div id="leaflet-map"></div>
+    </section>
+
+    <!-- Länderübersicht als Liste -->
+    <section class="map-container">
+      <h2>Übersicht der Länder mit Freiheitswerten (2023)</h2>
+      <p>Die folgende Tabelle listet alle europäischen Länder mit ihrem Freiheitsscore (0–100) und dem Status laut Freedom House Report 2023:</p>
+      <ul>
+        <li>Albanien – 61 – teilweise frei</li>
+        <li>Andorra – 95 – frei</li>
+        <li>Armenien – 64 – teilweise frei</li>
+        <li>Österreich – 92 – frei</li>
+        <li>Aserbaidschan – 23 – nicht frei</li>
+        <li>Belgien – 90 – frei</li>
+        <li>Bosnien-H. – 67 – teilweise frei</li>
+        <li>Bulgarien – 81 – teilweise frei</li>
+        <li>Dänemark – 98 – frei</li>
+        <li>Deutschland – 94 – frei</li>
+        <li>Estland – 95 – frei</li>
+        <li>Finnland – 100 – frei</li>
+        <li>Frankreich – 90 – frei</li>
+        <li>Georgien – 60 – teilweise frei</li>
+        <li>Griechenland – 88 – frei</li>
+        <li>Großbritannien – 93 – frei</li>
+        <li>Irland – 99 – frei</li>
+        <li>Island – 100 – frei</li>
+        <li>Italien – 89 – frei</li>
+        <li>Kosovo – 71 – teilweise frei</li>
+        <li>Kroatien – 88 – frei</li>
+        <li>Lettland – 94 – frei</li>
+        <li>Liechtenstein – 95 – frei</li>
+        <li>Litauen – 95 – frei</li>
+        <li>Luxemburg – 98 – frei</li>
+        <li>Malta – 95 – frei</li>
+        <li>Moldau – 62 – teilweise frei</li>
+        <li>Monaco – 90 – frei</li>
+        <li>Montenegro – 72 – teilweise frei</li>
+        <li>Niederlande – 90 – frei</li>
+        <li>Nordmazedonien – 71 – teilweise frei</li>
+        <li>Norwegen – 100 – frei</li>
+        <li>Polen – 78 – teilweise frei</li>
+        <li>Portugal – 90 – frei</li>
+        <li>Rumänien – 75 – teilweise frei</li>
+        <li>Russland – 16 – nicht frei</li>
+        <li>San Marino – 92 – frei</li>
+        <li>Schweden – 94 – frei</li>
+        <li>Schweiz – 99 – frei</li>
+        <li>Serbien – 73 – teilweise frei</li>
+        <li>Slowakei – 91 – frei</li>
+        <li>Slowenien – 92 – frei</li>
+        <li>Spanien – 89 – frei</li>
+        <li>Tschechien – 89 – frei</li>
+        <li>Türkei – 32 – nicht frei</li>
+        <li>Ukraine – 60 – teilweise frei</li>
+        <li>Ungarn – 69 – teilweise frei</li>
+        <li>Weißrussland – 21 – nicht frei</li>
+        <li>Zypern – 95 – frei</li>
+      </ul>
+    </section>
+
+    <!-- Datenquellen -->
+    <section class="data-disclaimer">
+      <h2>Datenquellen</h2>
+      <p>Daten von <a href="https://freedomhouse.org/country/scores" target="_blank">Freedom House</a> (Lizenz: <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC-BY-NC-ND 4.0</a>).</p>
+      <p>Hintergrund von <a href="https://www.flickr.com/photos/152975694@N02/36401449295" target="_blank">BMN Network</a> (Lizenz: <a href="https://creativecommons.org/licenses/by/2.0/" target="_blank">CC-BY 2.0</a>).</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Assignment 3 | Akademische Nutzung</p>
+    <p class="credits">Oguzhan Eraslan | 12307544 | VU Multimedia Cartography</p>
+  </footer>
+
+  <!-- Leaflet JS -->
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    crossorigin=""
+  ></script>
+
+  <script>
+    // 1) Wir definieren alle Icon-Varianten (klein und groß) für die drei Status.
+    //    Das verhindert, dass Marker "hüpfen" – wir tauschen nur die Icon-Größe aus.
+    const iconSmallFree       = L.icon({ iconUrl: "images/icon_free.png",       iconSize: [16, 16], iconAnchor: [8, 8], popupAnchor: [0, -8] });
+    const iconLargeFree       = L.icon({ iconUrl: "images/icon_free.png",       iconSize: [24, 24], iconAnchor: [12, 12], popupAnchor: [0, -12] });
+    const iconSmallPartly     = L.icon({ iconUrl: "images/icon_partly_free.png", iconSize: [16, 16], iconAnchor: [8, 8], popupAnchor: [0, -8] });
+    const iconLargePartly     = L.icon({ iconUrl: "images/icon_partly_free.png", iconSize: [24, 24], iconAnchor: [12, 12], popupAnchor: [0, -12] });
+    const iconSmallNot        = L.icon({ iconUrl: "images/icon_not_free.png",    iconSize: [16, 16], iconAnchor: [8, 8], popupAnchor: [0, -8] });
+    const iconLargeNot        = L.icon({ iconUrl: "images/icon_not_free.png",    iconSize: [24, 24], iconAnchor: [12, 12], popupAnchor: [0, -12] });
+
+    function getSmallIcon(status) {
+      if (status === "frei")           return iconSmallFree;
+      if (status === "teilweise frei") return iconSmallPartly;
+                                        return iconSmallNot;
+    }
+    function getLargeIcon(status) {
+      if (status === "frei")           return iconLargeFree;
+      if (status === "teilweise frei") return iconLargePartly;
+                                        return iconLargeNot;
+    }
+
+    // 2) Leaflet-Karte initialisieren
+    const map = L.map("leaflet-map").setView([52.2, 15.2], 4);
+
+    // OSM-Tiles
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 18,
+      attribution: '© OpenStreetMap-Mitwirkende | Datenquelle: Freedom House Report 2023',
+    }).addTo(map);
+
+    // Bounding Box Europa
+    const europeBounds = [[32, -25], [72, 50]];
+    L.rectangle(europeBounds, {
+      color: "blue",
+      weight: 2,
+      fillOpacity: 0.05
+    }).addTo(map).bindPopup("Europäischer Kontinent");
+
+    // 3) Liste aller europäischen Länder (mit Koordinaten, Status, Score)
+    const europeCountries = [
+      { name: 'Albanien', coords: [41.1, 20.0], status: 'teilweise frei', score: 61 },
+      { name: 'Andorra', coords: [42.55, 1.6], status: 'frei', score: 95 },
+      { name: 'Armenien', coords: [40.3, 44.9], status: 'teilweise frei', score: 64 },
+      { name: 'Österreich', coords: [47.5, 14.6], status: 'frei', score: 92 },
+      { name: 'Aserbaidschan', coords: [40.4, 47.3], status: 'nicht frei', score: 23 },
+      { name: 'Belgien', coords: [50.6, 4.7], status: 'frei', score: 90 },
+      { name: 'Bosnien-H.', coords: [44.2, 17.6], status: 'teilweise frei', score: 67 },
+      { name: 'Bulgarien', coords: [42.8, 25.2], status: 'teilweise frei', score: 81 },
+      { name: 'Dänemark', coords: [56.0, 10.0], status: 'frei', score: 98 },
+      { name: 'Deutschland', coords: [51.0, 10.0], status: 'frei', score: 94 },
+      { name: 'Estland', coords: [58.6, 25.5], status: 'frei', score: 95 },
+      { name: 'Finnland', coords: [62.0, 26.0], status: 'frei', score: 100 },
+      { name: 'Frankreich', coords: [46.5, 2.2], status: 'frei', score: 90 },
+      { name: 'Georgien', coords: [42.0, 43.5], status: 'teilweise frei', score: 60 },
+      { name: 'Griechenland', coords: [39.0, 22.0], status: 'frei', score: 88 },
+      { name: 'Großbritannien', coords: [54.0, -2.0], status: 'frei', score: 93 },
+      { name: 'Irland', coords: [53.4, -7.6], status: 'frei', score: 99 },
+      { name: 'Island', coords: [64.9, -18.6], status: 'frei', score: 100 },
+      { name: 'Italien', coords: [42.8, 12.8], status: 'frei', score: 89 },
+      { name: 'Kosovo', coords: [42.6, 20.9], status: 'teilweise frei', score: 71 },
+      { name: 'Kroatien', coords: [45.3, 16.4], status: 'frei', score: 88 },
+      { name: 'Lettland', coords: [56.9, 25.0], status: 'frei', score: 94 },
+      { name: 'Liechtenstein', coords: [47.1, 9.6], status: 'frei', score: 95 },
+      { name: 'Litauen', coords: [55.2, 24.1], status: 'frei', score: 95 },
+      { name: 'Luxemburg', coords: [49.7, 6.1], status: 'frei', score: 98 },
+      { name: 'Malta', coords: [35.9, 14.4], status: 'frei', score: 95 },
+      { name: 'Moldau', coords: [47.2, 28.5], status: 'teilweise frei', score: 62 },
+      { name: 'Monaco', coords: [43.73, 7.42], status: 'frei', score: 90 },
+      { name: 'Montenegro', coords: [42.7, 19.3], status: 'teilweise frei', score: 72 },
+      { name: 'Niederlande', coords: [52.3, 5.3], status: 'frei', score: 90 },
+      { name: 'Nordmazedonien', coords: [41.6, 21.7], status: 'teilweise frei', score: 71 },
+      { name: 'Norwegen', coords: [61.2, 8.5], status: 'frei', score: 100 },
+      { name: 'Polen', coords: [52.0, 19.1], status: 'teilweise frei', score: 78 },
+      { name: 'Portugal', coords: [39.5, -8.0], status: 'frei', score: 90 },
+      { name: 'Rumänien', coords: [45.8, 24.9], status: 'teilweise frei', score: 75 },
+      { name: 'Russland', coords: [55.75, 37.615], status: 'nicht frei', score: 16 },
+      { name: 'San Marino', coords: [43.9, 12.5], status: 'frei', score: 92 },
+      { name: 'Schweden', coords: [58, 15], status: 'frei', score: 94 },
+      { name: 'Schweiz', coords: [46.8, 8.3], status: 'frei', score: 99 },
+      { name: 'Serbien', coords: [44.0, 20.9], status: 'teilweise frei', score: 73 },
+      { name: 'Slowakei', coords: [48.7, 19.5], status: 'frei', score: 91 },
+      { name: 'Slowenien', coords: [46.2, 14.8], status: 'frei', score: 92 },
+      { name: 'Spanien', coords: [40.2, -3.7], status: 'frei', score: 89 },
+      { name: 'Tschechien', coords: [49.8, 15.5], status: 'frei', score: 89 },
+      { name: 'Türkei', coords: [39.0, 35.2], status: 'nicht frei', score: 32 },
+      { name: 'Ukraine', coords: [49.0, 31.0], status: 'teilweise frei', score: 60 },
+      { name: 'Ungarn', coords: [47.1, 19.5], status: 'teilweise frei', score: 69 },
+      { name: 'Weißrussland', coords: [53.7, 27.9], status: 'nicht frei', score: 21 },
+      { name: 'Zypern', coords: [35.0, 33.3], status: 'frei', score: 95 },
+    ];
+
+    // 4) Marker anlegen und Hover-/Click-Logik
+    let activeMarker = null;
+    europeCountries.forEach((country) => {
+      // a) Kleines Icon initial
+      const marker = L.marker(country.coords, {
+        icon: getSmallIcon(country.status)
+      }).addTo(map);
+
+      marker.bindPopup(`<h3>${country.name}</h3>
+                       <p>Status: ${country.status}<br>Score: ${country.score}</p>`);
+
+      // b) Klick → Popup, Zoom, Icon in "aktiv" wechseln
+      marker.on('click', function(e) {
+        map.setView(e.latlng, 6);
+        this.openPopup();
+
+        // Vorherigen Marker zurücksetzen
+        if (activeMarker && activeMarker !== marker) {
+          const oldStatus = activeMarker.options.icon.options.iconUrl.includes("partly")
+            ? "teilweise frei"
+            : (activeMarker.options.icon.options.iconUrl.includes("not") ? "nicht frei" : "frei");
+          activeMarker.setIcon(getSmallIcon(oldStatus));
+          activeMarker.closePopup();
+        }
+
+        // Eigener Status toggeln
+        if (activeMarker === marker) {
+          marker.setIcon(getSmallIcon(country.status));
+          marker.closePopup();
+          activeMarker = null;
+        } else {
+          marker.setIcon(getLargeIcon(country.status));
+          marker.openPopup();
+          activeMarker = marker;
+        }
+      });
+
+      // c) Hover → Großes Icon anzeigen (temporär)
+      marker.on('mouseover', function() {
+        if (activeMarker !== marker) {
+          marker.setIcon(getLargeIcon(country.status));
+        }
+      });
+
+      // d) Mouseout → Kleines Icon zurück, falls nicht aktiv
+      marker.on('mouseout', function() {
+        if (activeMarker !== marker) {
+          marker.setIcon(getSmallIcon(country.status));
+        }
+      });
+    });
+
+    // 5) Wenn die Karte (z. B. nach Scrollen oder nach kurzer Zeit) zuerst versteckt war,
+    //    geht Leaflet manchmal von Null-Höhe aus. Wir zwingen eine Größen-Anpassung:
+    map.whenReady(() => {
+      map.invalidateSize();
+    });
+    window.addEventListener('resize', () => {
+      map.invalidateSize();
+    });
+
+    // 6) Klick auf blaues Rechteck scrollt zur Leaflet-Karte
+    document.getElementById("manual-rect").addEventListener("click", () => {
+      document.getElementById("leaflet-section").scrollIntoView({ behavior: "smooth" });
+      // Nach dem Scrollen nochmal sicherstellen, dass Leaflet neu zeichnet:
+      setTimeout(() => map.invalidateSize(), 300);
+    });
+  </script>
+
+  <script>
+    // 7) Interaktive Popups für die manuelle Karte
+    document.querySelectorAll('.manual-map .marker').forEach(marker => {
+      marker.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const popup = document.createElement('div');
+        popup.className = 'popup';
+        popup.innerHTML = `<strong>${marker.dataset.title}</strong><br>${marker.dataset.text}`;
+        const container = document.querySelector('.manual-map');
+        container.appendChild(popup);
+
+        const pw = popup.offsetWidth,
+              ph = popup.offsetHeight;
+        popup.style.top  = (marker.offsetTop - ph - 8) + 'px';
+        popup.style.left = (marker.offsetLeft - pw/2 + marker.offsetWidth/2) + 'px';
+        popup.style.display = 'block';
+
+        document.addEventListener('click', function handler(ev) {
+          if (!popup.contains(ev.target)) {
+            popup.remove();
+            document.removeEventListener('click', handler);
+          }
+        }, { once: true });
+      });
+    });
+  </script>
+</body>
+</html>
